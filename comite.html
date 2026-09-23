@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comitê de Estudos — OBDC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f1923;--ink-soft:#4a5568;--muted:#888780;
+  --surface:#f7f6f2;--white:#ffffff;--border:#e4e2dc;--border-strong:#c8c6be;
+  --teal:#007e6a;--teal-light:#e0f5f0;--teal-mid:#5cb8a8;
+  --gold:#d4531e;--gold-light:#fdf0eb;
+  --ok:#15803d;--ok-bg:#f0fdf4;--ok-border:#86efac;
+  --warn:#a05c00;--warn-bg:#fdf3e4;--warn-border:#fcd34d;
+  --danger:#b91c1c;--danger-bg:#fef2f2;
+  --blue:#1a56a0;--blue-bg:#e8f0fb;
+  --purple:#534ab7;--purple-bg:#eeedfe;
+  --radius:8px;--radius-lg:12px;
+}
+body{font-family:'Space Grotesk',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh;padding-bottom:4rem}
+
+/* ── TOP BAR ── */
+.top-bar{background:var(--ink);color:#fff;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:50}
+.logo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.conn-badge{font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:#1e2d38}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:#888}
+.conn-dot.on{background:#4ade80}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 54px)}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--white);border-right:1px solid var(--border);padding:1rem;overflow-y:auto;position:sticky;top:54px;height:calc(100vh - 54px)}
+.sidebar-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between}
+.btn-new-mtg{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;width:100%;padding:9px 12px;border-radius:var(--radius);border:1.5px dashed var(--teal-mid);background:var(--teal-light);color:var(--teal);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:1rem;transition:all .15s}
+.btn-new-mtg:hover{background:#c5eee6;border-color:var(--teal)}
+.mtg-item{padding:9px 10px;border-radius:var(--radius);cursor:pointer;margin-bottom:4px;border:1px solid transparent;transition:all .15s}
+.mtg-item:hover{background:var(--surface);border-color:var(--border)}
+.mtg-item.active{background:var(--teal-light);border-color:var(--teal-mid)}
+.mtg-item-date{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--muted)}
+.mtg-item.active .mtg-item-date{color:var(--teal)}
+.mtg-item-title{font-size:13px;font-weight:500;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtg-item.active .mtg-item-title{color:var(--teal)}
+.mtg-item-count{font-size:10px;color:var(--muted);margin-top:2px}
+.sidebar-empty{font-size:12px;color:var(--muted);text-align:center;padding:1.5rem .5rem}
+
+/* ── MAIN ── */
+.main{padding:1.5rem;overflow-y:auto}
+.main-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;color:var(--muted)}
+.main-empty i{font-size:48px;opacity:.25;margin-bottom:1rem}
+.main-empty p{font-size:14px;margin-bottom:1.25rem}
+
+/* ── MEETING HEADER ── */
+.mtg-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.mtg-header-left{}
+.mtg-date-badge{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.mtg-title-input{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;color:var(--ink);border:none;background:none;outline:none;width:100%;padding:2px 0;border-bottom:2px solid transparent;transition:border-color .15s}
+.mtg-title-input:focus{border-bottom-color:var(--teal-mid)}
+.mtg-title-input::placeholder{color:var(--muted);font-weight:400}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--white);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--surface)}
+.btn-teal{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn-teal:hover{background:#006657;border-color:#006657}
+.btn-danger{color:var(--danger);border-color:var(--danger)}
+.btn-danger:hover{background:var(--danger-bg)}
+.btn-sm{font-size:11px;padding:5px 10px;gap:4px}
+
+/* ── STATUS CHIPS ── */
+.status-row{display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.chip{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.chip-agenda{background:var(--blue-bg);color:var(--blue)}
+.chip-andamento{background:var(--warn-bg);color:var(--warn)}
+.chip-concluida{background:var(--ok-bg);color:var(--ok)}
+.chip-sel{border:1.5px solid currentColor}
+
+/* ── SECTIONS ── */
+.section{margin-bottom:1.75rem}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.section-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+.section-label i{font-size:15px}
+
+/* ── PAUTA ITEMS ── */
+.pauta-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:.65rem;overflow:hidden;transition:box-shadow .15s}
+.pauta-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.pauta-top{display:grid;grid-template-columns:28px 1fr auto auto;gap:8px;align-items:center;padding:12px 14px}
+.pauta-num{font-size:13px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-align:center}
+.pauta-text-input{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:500;color:var(--ink);border:none;background:none;outline:none;width:100%;padding:2px 0;border-bottom:1px solid transparent}
+.pauta-text-input:focus{border-bottom-color:var(--teal-mid)}
+.pauta-text-input::placeholder{color:var(--muted);font-weight:400}
+.status-sel{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;border:none;cursor:pointer;outline:none}
+.status-agenda{background:var(--blue-bg);color:var(--blue)}
+.status-andamento{background:var(--warn-bg);color:var(--warn)}
+.status-concluida{background:var(--ok-bg);color:var(--ok)}
+.pauta-expand-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px;border-radius:6px;display:flex;align-items:center;transition:all .15s}
+.pauta-expand-btn:hover{background:var(--surface);color:var(--ink)}
+.pauta-body{border-top:1px solid var(--border);padding:12px 14px 14px;display:none}
+.pauta-body.open{display:block}
+.notes-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.notes-input{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);width:100%;padding:10px 12px;resize:vertical;min-height:80px;line-height:1.6;transition:border-color .15s}
+.notes-input:focus{outline:none;border-color:var(--teal-mid)}
+.notes-input::placeholder{color:var(--muted)}
+
+/* ── ENCAMINHAMENTOS ── */
+.enc-item{display:grid;grid-template-columns:1fr auto 36px;gap:8px;align-items:center;margin-bottom:6px}
+.enc-input{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);padding:8px 10px;width:100%;transition:border-color .15s}
+.enc-input:focus{outline:none;border-color:var(--teal-mid)}
+.enc-input::placeholder{color:var(--muted)}
+.enc-resp{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--ink);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);padding:8px 10px;width:130px;transition:border-color .15s}
+.enc-resp:focus{outline:none;border-color:var(--teal-mid)}
+.enc-resp::placeholder{color:var(--muted)}
+.enc-del{background:none;border:none;cursor:pointer;color:var(--muted);width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.enc-del:hover{color:var(--danger);background:var(--danger-bg)}
+.enc-check{display:flex;align-items:center;gap:6px}
+.enc-check input[type=checkbox]{width:15px;height:15px;accent-color:var(--teal);cursor:pointer}
+.enc-done .enc-input,.enc-done .enc-resp{text-decoration:line-through;color:var(--muted)}
+
+/* ── NOTAS GERAIS ── */
+.general-notes{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--ink);border:1px solid var(--border);border-radius:var(--radius);background:var(--white);width:100%;padding:12px 14px;resize:vertical;min-height:100px;line-height:1.7;transition:border-color .15s}
+.general-notes:focus{outline:none;border-color:var(--teal-mid)}
+.general-notes::placeholder{color:var(--muted)}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(15,25,35,.45);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:var(--radius-lg);padding:1.5rem;width:min(440px,95vw);box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem}
+.form-row{margin-bottom:.85rem}
+.form-label{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:5px;display:block}
+.form-input{font-family:'Space Grotesk',sans-serif;font-size:14px;width:100%;padding:9px 12px;border:1px solid var(--border-strong);border-radius:var(--radius);background:var(--surface);color:var(--ink)}
+.form-input:focus{outline:none;border-color:var(--teal)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:10px 18px;border-radius:20px;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* ── PRINT AREA ── */
+@media print{
+  .top-bar,.sidebar,.header-actions,.btn,.pauta-expand-btn,.enc-del,.status-sel,.btn-new-mtg{display:none!important}
+  .layout{grid-template-columns:1fr}
+  .pauta-body{display:block!important}
+  body{background:#fff}
+}
+
+@media(max-width:720px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:relative;top:0;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Comitê de Estudos · OBDC
+  </div>
+  <div class="conn-badge">
+    <div class="conn-dot" id="connDot"></div>
+    <span id="connLabel">Conectando...</span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <button class="btn-new-mtg" onclick="openNewMtg()">
+      <i class="ti ti-plus"></i> Nova reunião
+    </button>
+    <div class="sidebar-title">Reuniões</div>
+    <div id="mtgList"><div class="sidebar-empty"><i class="ti ti-loader" style="font-size:20px;display:block;margin-bottom:6px;animation:spin 1s linear infinite"></i>Carregando...</div></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="mainArea">
+    <div class="main-empty">
+      <i class="ti ti-notebook"></i>
+      <p>Selecione uma reunião ao lado<br>ou crie uma nova para começar.</p>
+      <button class="btn btn-teal" onclick="openNewMtg()"><i class="ti ti-plus"></i> Nova reunião</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL NOVA REUNIÃO -->
+<div class="overlay" id="modalMtg">
+  <div class="modal">
+    <div class="modal-title" id="modalMtgTitle">Nova reunião</div>
+    <div class="form-row">
+      <label class="form-label">Data da reunião</label>
+      <input type="date" class="form-input" id="mmDate">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Título / tema geral (opcional)</label>
+      <input type="text" class="form-input" id="mmTitle" placeholder="Ex: Reforma Tributária e processos internos">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Participantes (opcional)</label>
+      <input type="text" class="form-input" id="mmParticipants" placeholder="Ex: Larissa, Guilherme, Fernanda...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modalMtg')">Cancelar</button>
+      <button class="btn btn-teal" onclick="saveMtg()"><i class="ti ti-check"></i> Criar reunião</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+// ── FIREBASE ─────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey:"AIzaSyA5awAtgoW1_IYdB49Y2JaXtitK6oVrs5Q",
+  authDomain:"gestao-lari.firebaseapp.com",
+  databaseURL:"https://gestao-lari-default-rtdb.firebaseio.com",
+  projectId:"gestao-lari",
+  storageBucket:"gestao-lari.firebasestorage.app",
+  messagingSenderId:"905341992680",
+  appId:"1:905341992680:web:38066c7f4a48febe2c135d"
+});
+const db = firebase.database();
+const refMtgs = db.ref('comite_reunioes');
+
+// ── STATE ────────────────────────────────────────────────
+let meetings = {};
+let activeMid = null;
+let saveTimer = {};
+
+// ── CONNECTION ───────────────────────────────────────────
+db.ref('.info/connected').on('value', s => {
+  const ok = !!s.val();
+  document.getElementById('connDot').className = 'conn-dot'+(ok?' on':'');
+  document.getElementById('connLabel').textContent = ok ? 'Sincronizado' : 'Reconectando...';
+});
+
+// ── LISTENER ─────────────────────────────────────────────
+refMtgs.on('value', snap => {
+  meetings = snap.val() || {};
+  renderSidebar();
+  if (activeMid && meetings[activeMid]) renderMeeting(activeMid);
+  else if (activeMid && !meetings[activeMid]) {
+    activeMid = null;
+    document.getElementById('mainArea').innerHTML = `<div class="main-empty"><i class="ti ti-notebook"></i><p>Selecione uma reunião ao lado.</p></div>`;
+  }
+});
+
+// ── HELPERS ──────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(d){
+  if(!d) return '—';
+  const [y,m,day]=d.split('-');
+  return `${day}/${m}/${y}`;
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function debounce(mid, key, fn, ms=900){
+  const k = mid+'_'+key;
+  clearTimeout(saveTimer[k]);
+  saveTimer[k] = setTimeout(fn, ms);
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────
+function renderSidebar(){
+  const ids = Object.keys(meetings).sort((a,b)=>{
+    return (meetings[b].date||'').localeCompare(meetings[a].date||'');
+  });
+  const el = document.getElementById('mtgList');
+  if(!ids.length){
+    el.innerHTML = '<div class="sidebar-empty">Nenhuma reunião ainda.<br>Crie a primeira acima.</div>';
+    return;
+  }
+  el.innerHTML = ids.map(mid=>{
+    const m = meetings[mid];
+    const pauta = m.pauta || [];
+    const conc = pauta.filter(p=>p.status==='concluida').length;
+    const active = mid===activeMid ? ' active' : '';
+    return `<div class="mtg-item${active}" onclick="selectMtg('${mid}')">
+      <div class="mtg-item-date"><i class="ti ti-calendar" style="font-size:11px"></i> ${fmtDate(m.date)}</div>
+      <div class="mtg-item-title">${esc(m.title||'Sem título')}</div>
+      <div class="mtg-item-count">${pauta.length} item${pauta.length!==1?'s':''} na pauta${pauta.length?` · ${conc} concluído${conc!==1?'s':''}`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── SELECT / RENDER MEETING ───────────────────────────────
+window.selectMtg = function(mid){
+  activeMid = mid;
+  renderSidebar();
+  renderMeeting(mid);
+};
+
+function renderMeeting(mid){
+  const m = meetings[mid];
+  if(!m) return;
+  const pauta = m.pauta || [];
+  const encs  = m.encaminhamentos || [];
+  const pendEnc = encs.filter(e=>!e.done).length;
+
+  document.getElementById('mainArea').innerHTML = `
+    <div class="mtg-header">
+      <div class="mtg-header-left" style="flex:1;min-width:0">
+        <div class="mtg-date-badge">
+          <i class="ti ti-calendar" style="font-size:13px"></i>
+          ${fmtDate(m.date)}
+          ${m.participants ? `<span style="margin-left:8px"><i class="ti ti-users" style="font-size:12px"></i> ${esc(m.participants)}</span>` : ''}
+        </div>
+        <input class="mtg-title-input" type="text" value="${esc(m.title||'')}" placeholder="Título da reunião..." onblur="saveField('${mid}','title',this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-sm" onclick="printMtg()"><i class="ti ti-printer"></i> Imprimir</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteMtg('${mid}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>
+
+    <!-- PAUTA -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-label"><i class="ti ti-list-check"></i> Pauta</div>
+        <button class="btn btn-sm btn-teal" onclick="addPauta('${mid}')"><i class="ti ti-plus"></i> Item</button>
+      </div>
+      <div id="pautaList">
+        ${pauta.length ? pauta.map((p,i)=>renderPautaItem(mid,p,i)).join('') : '<div style="font-size:13px;color:var(--muted);padding:8px 0">Nenhum item na pauta ainda. Adicione o primeiro.</div>'}
+      </div>
+    </div>
+
+    <!-- ENCAMINHAMENTOS -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-label">
+          <i class="ti ti-arrow-right"></i> Encaminhamentos / Ações
+          ${pendEnc ? `<span style="background:var(--warn-bg);color:var(--warn);font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px">${pendEnc} pendente${pendEnc!==1?'s':''}</span>` : ''}
+        </div>
+        <button class="btn btn-sm" onclick="addEnc('${mid}')"><i class="ti ti-plus"></i> Ação</button>
+      </div>
+      <div id="encList">
+        ${encs.length ? encs.map((e,i)=>renderEncItem(mid,e,i)).join('') : '<div style="font-size:13px;color:var(--muted);padding:8px 0">Nenhum encaminhamento registrado.</div>'}
+      </div>
+    </div>
+
+    <!-- NOTAS GERAIS -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-label"><i class="ti ti-note"></i> Notas gerais da reunião</div>
+      </div>
+      <textarea class="general-notes" placeholder="Observações, contextos importantes, pontos de atenção..." onblur="saveField('${mid}','notes',this.value)">${esc(m.notes||'')}</textarea>
+    </div>
+  `;
+}
+
+function renderPautaItem(mid, p, i){
+  const statusClass = p.status==='concluida' ? 'status-concluida' : p.status==='andamento' ? 'status-andamento' : 'status-agenda';
+  return `
+    <div class="pauta-item" id="pauta-${mid}-${i}">
+      <div class="pauta-top">
+        <div class="pauta-num">${i+1}</div>
+        <input class="pauta-text-input" type="text" value="${esc(p.text||'')}" placeholder="Descreva o assunto..." onblur="savePautaField('${mid}',${i},'text',this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+        <select class="status-sel ${statusClass}" onchange="savePautaField('${mid}',${i},'status',this.value); this.className='status-sel status-'+this.value">
+          <option value="agenda" ${(p.status||'agenda')==='agenda'?'selected':''}>Na pauta</option>
+          <option value="andamento" ${p.status==='andamento'?'selected':''}>Em andamento</option>
+          <option value="concluida" ${p.status==='concluida'?'selected':''}>Concluído</option>
+        </select>
+        <button class="pauta-expand-btn" onclick="togglePauta('${mid}',${i})" title="Anotações">
+          <i class="ti ti-chevron-down"></i>
+        </button>
+      </div>
+      <div class="pauta-body" id="pautabody-${mid}-${i}">
+        <div class="notes-label">Anotações deste item</div>
+        <textarea class="notes-input" placeholder="Pontos discutidos, referências, links..." onblur="savePautaField('${mid}',${i},'notes',this.value)">${esc(p.notes||'')}</textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:8px">
+          <button class="btn btn-sm btn-danger" onclick="delPauta('${mid}',${i})"><i class="ti ti-trash"></i> Remover item</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderEncItem(mid, e, i){
+  const done = !!e.done;
+  return `
+    <div class="enc-item ${done?'enc-done':''}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" ${done?'checked':''} onchange="toggleEnc('${mid}',${i},this.checked)" title="Concluído" style="width:15px;height:15px;accent-color:var(--teal);cursor:pointer;flex-shrink:0">
+        <input class="enc-input" type="text" value="${esc(e.text||'')}" placeholder="Descreva a ação..." onblur="saveEncField('${mid}',${i},'text',this.value)">
+      </div>
+      <input class="enc-resp" type="text" value="${esc(e.resp||'')}" placeholder="Responsável" onblur="saveEncField('${mid}',${i},'resp',this.value)">
+      <button class="enc-del" onclick="delEnc('${mid}',${i})"><i class="ti ti-trash"></i></button>
+    </div>`;
+}
+
+// ── PAUTA ACTIONS ────────────────────────────────────────
+window.addPauta = function(mid){
+  const m = meetings[mid] || {};
+  const pauta = [...(m.pauta||[]), {text:'',status:'agenda',notes:''}];
+  refMtgs.child(mid).child('pauta').set(pauta);
+};
+
+window.savePautaField = function(mid, i, field, val){
+  const pauta = [...(meetings[mid]?.pauta||[])];
+  if(!pauta[i]) return;
+  if(pauta[i][field]===val) return;
+  pauta[i][field]=val;
+  refMtgs.child(mid).child('pauta').set(pauta);
+};
+
+window.delPauta = function(mid, i){
+  if(!confirm('Remover este item da pauta?')) return;
+  const pauta = [...(meetings[mid]?.pauta||[])];
+  pauta.splice(i,1);
+  refMtgs.child(mid).child('pauta').set(pauta.length?pauta:null);
+};
+
+window.togglePauta = function(mid, i){
+  const body = document.getElementById(`pautabody-${mid}-${i}`);
+  const btn  = body?.previousElementSibling?.querySelector('.pauta-expand-btn i');
+  if(!body) return;
+  const open = body.classList.toggle('open');
+  if(btn) btn.className = open ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+};
+
+// ── ENC ACTIONS ──────────────────────────────────────────
+window.addEnc = function(mid){
+  const encs = [...(meetings[mid]?.encaminhamentos||[]), {text:'',resp:'',done:false}];
+  refMtgs.child(mid).child('encaminhamentos').set(encs);
+};
+
+window.saveEncField = function(mid, i, field, val){
+  const encs = [...(meetings[mid]?.encaminhamentos||[])];
+  if(!encs[i]) return;
+  if(encs[i][field]===val) return;
+  encs[i][field]=val;
+  refMtgs.child(mid).child('encaminhamentos').set(encs);
+};
+
+window.toggleEnc = function(mid, i, done){
+  const encs = [...(meetings[mid]?.encaminhamentos||[])];
+  if(!encs[i]) return;
+  encs[i].done=done;
+  refMtgs.child(mid).child('encaminhamentos').set(encs);
+};
+
+window.delEnc = function(mid, i){
+  const encs = [...(meetings[mid]?.encaminhamentos||[])];
+  encs.splice(i,1);
+  refMtgs.child(mid).child('encaminhamentos').set(encs.length?encs:null);
+};
+
+// ── GENERAL FIELD ────────────────────────────────────────
+window.saveField = function(mid, field, val){
+  if((meetings[mid]?.[field]||'')=== val) return;
+  refMtgs.child(mid).child(field).set(val);
+};
+
+// ── NEW MEETING ──────────────────────────────────────────
+window.openNewMtg = function(){
+  document.getElementById('modalMtgTitle').textContent = 'Nova reunião';
+  document.getElementById('mmDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('mmTitle').value = '';
+  document.getElementById('mmParticipants').value = '';
+  document.getElementById('modalMtg').classList.add('open');
+};
+
+window.saveMtg = function(){
+  const date  = document.getElementById('mmDate').value;
+  const title = document.getElementById('mmTitle').value.trim();
+  const parts = document.getElementById('mmParticipants').value.trim();
+  if(!date){ showToast('Selecione a data'); return; }
+  const ref = refMtgs.push();
+  ref.set({
+    date, title: title||'Reunião quinzenal',
+    participants: parts||'',
+    pauta:[], encaminhamentos:[], notes:''
+  });
+  const mid = ref.key;
+  activeMid = mid;
+  closeModal('modalMtg');
+  showToast('Reunião criada!');
+};
+
+// ── DELETE MTG ───────────────────────────────────────────
+window.deleteMtg = function(mid){
+  const m = meetings[mid]||{};
+  if(!confirm(`Excluir a reunião "${m.title||fmtDate(m.date)}"? Esta ação não pode ser desfeita.`)) return;
+  refMtgs.child(mid).remove();
+  activeMid = null;
+  showToast('Reunião excluída.');
+};
+
+// ── MODAL / PRINT ────────────────────────────────────────
+window.closeModal = function(id){ document.getElementById(id).classList.remove('open'); };
+document.querySelectorAll('.overlay').forEach(el=>{
+  el.addEventListener('click',e=>{ if(e.target===el) el.classList.remove('open'); });
+});
+window.printMtg = function(){ window.print(); };
+
+// ── CSS ANIM ─────────────────────────────────────────────
+const st = document.createElement('style');
+st.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(st);
+</script>
+</body>
+</html>
